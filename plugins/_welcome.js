@@ -1,11 +1,12 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import fetch from 'node-fetch';
-import { readFile } from 'fs/promises';
 
-// Inicialización del cliente
+// Configuración del cliente
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth(),
 });
+
+const groupSettings = {}; // Almacena el estado de "welcome" por grupo
 
 // Función para descargar una imagen desde una URL
 const getImageBuffer = async (url) => {
@@ -13,32 +14,57 @@ const getImageBuffer = async (url) => {
     return await response.buffer();
 };
 
-// Evento cuando un participante entra al grupo
-client.on('group_join', async (notification) => {
-    const chat = await notification.getChat();
-    const welcomeImageUrl = 'https://i.ibb.co/hYFH7FB/file.jpg';
-    const welcomeMessage = `🎉 ¡Bienvenido al grupo, @${notification.id.participant.split('@')[0]}! 🎉`;
-
-    // Descargar la imagen desde la URL
-    const imageBuffer = await getImageBuffer(welcomeImageUrl);
-
-    // Envía la imagen y el mensaje
-    chat.sendMessage(welcomeMessage, { mentions: [notification.id.participant] });
-    chat.sendMessage(imageBuffer, { media: { mimetype: 'image/jpeg' } });
+// Evento cuando el bot está listo
+client.on('ready', () => {
+    console.log('¡El bot está listo y conectado!');
 });
 
-// Evento cuando un participante sale del grupo
+// Comando para activar o desactivar bienvenida
+client.on('message', async (message) => {
+    if (message.body.toLowerCase() === 'welcome on') {
+        if (message.isGroupMsg) {
+            groupSettings[message.from] = true;
+            message.reply('✅ Bienvenidas y despedidas activadas en este grupo.');
+        }
+    } else if (message.body.toLowerCase() === 'welcome off') {
+        if (message.isGroupMsg) {
+            groupSettings[message.from] = false;
+            message.reply('❌ Bienvenidas y despedidas desactivadas en este grupo.');
+        }
+    }
+});
+
+// Evento cuando alguien entra al grupo
+client.on('group_join', async (notification) => {
+    const chat = await notification.getChat();
+    if (groupSettings[chat.id._serialized]) {
+        const welcomeImageUrl = 'https://i.ibb.co/hYFH7FB/file.jpg'; // URL de imagen
+        const welcomeMessage = `🎉 ¡Bienvenido al grupo, @${notification.id.participant.split('@')[0]}! 🎉`;
+
+        // Descargar y enviar la imagen
+        const imageBuffer = await getImageBuffer(welcomeImageUrl);
+        await chat.sendMessage(welcomeMessage, { mentions: [notification.id.participant] });
+        await chat.sendMessage(imageBuffer, { media: { mimetype: 'image/jpeg' } });
+    }
+});
+
+// Evento cuando alguien sale del grupo
 client.on('group_leave', async (notification) => {
     const chat = await notification.getChat();
-    const goodbyeImageUrl = 'https://i.ibb.co/hYFH7FB/file.jpg';
-    const goodbyeMessage = `👋 ¡Adiós, @${notification.id.participant.split('@')[0]}! ¡Te extrañaremos!`;
+    if (groupSettings[chat.id._serialized]) {
+        const goodbyeImageUrl = 'https://i.ibb.co/hYFH7FB/file.jpg'; // URL de imagen
+        const goodbyeMessage = `👋 ¡Adiós, @${notification.id.participant.split('@')[0]}! ¡Te extrañaremos!`;
 
-    // Descargar la imagen desde la URL
-    const imageBuffer = await getImageBuffer(goodbyeImageUrl);
+        // Descargar y enviar la imagen
+        const imageBuffer = await getImageBuffer(goodbyeImageUrl);
+        await chat.sendMessage(goodbyeMessage, { mentions: [notification.id.participant] });
+        await chat.sendMessage(imageBuffer, { media: { mimetype: 'image/jpeg' } });
+    }
+});
 
-    // Envía la imagen y el mensaje
-    chat.sendMessage(goodbyeMessage, { mentions: [notification.id.participant] });
-    chat.sendMessage(imageBuffer, { media: { mimetype: 'image/jpeg' } });
+// Manejo de errores
+client.on('error', (error) => {
+    console.error('Error:', error);
 });
 
 // Inicializar el cliente
