@@ -7,7 +7,7 @@ const client = new Client({
 });
 
 const groupSettings = {}; // Almacena el estado de "welcome" por grupo
-const prefix = '!'; // Prefijo para comandos
+const prefix = '&'; // Prefijo para comandos
 
 // Función para descargar una imagen desde una URL
 const getImageBuffer = async (url) => {
