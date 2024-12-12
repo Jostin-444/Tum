@@ -7,7 +7,7 @@ const client = new Client({
 });
 
 const groupSettings = {}; // Almacena el estado de "welcome" por grupo
-const prefix = '&'; // Prefijo para comandos
+const handler = { command: ['welcome'] }; // Definición del handler
 
 // Función para descargar una imagen desde una URL
 const getImageBuffer = async (url) => {
@@ -22,24 +22,28 @@ client.on('ready', () => {
 
 // Handler de comandos
 client.on('message', async (message) => {
+    const prefix = '!'; // Define el prefijo
     if (!message.body.startsWith(prefix)) return; // Ignora mensajes sin prefijo
 
     const args = message.body.slice(prefix.length).trim().split(' ');
     const command = args.shift().toLowerCase();
 
-    // Comando welcome on
-    if (command === 'welcome' && args[0] === 'on') {
-        if (message.isGroupMsg) {
-            groupSettings[message.from] = true;
-            message.reply('✅ Bienvenidas y despedidas activadas en este grupo.');
+    // Verifica si el comando pertenece al handler "welcome"
+    if (handler.command.includes(command)) {
+        if (!message.isGroupMsg) {
+            return message.reply('❌ Este comando solo funciona en grupos.');
         }
-    }
 
-    // Comando welcome off
-    if (command === 'welcome' && args[0] === 'off') {
-        if (message.isGroupMsg) {
+        const subCommand = args[0]?.toLowerCase();
+
+        if (subCommand === 'on') {
+            groupSettings[message.from] = true;
+            return message.reply('✅ Bienvenidas y despedidas activadas en este grupo.');
+        } else if (subCommand === 'off') {
             groupSettings[message.from] = false;
-            message.reply('❌ Bienvenidas y despedidas desactivadas en este grupo.');
+            return message.reply('❌ Bienvenidas y despedidas desactivadas en este grupo.');
+        } else {
+            return message.reply('⚠️ Uso incorrecto. Usa:\n`!welcome on` para activar\n`!welcome off` para desactivar');
         }
     }
 });
@@ -79,3 +83,4 @@ client.on('error', (error) => {
 
 // Inicializar el cliente
 client.initialize();
+          
