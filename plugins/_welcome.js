@@ -7,6 +7,7 @@ const client = new Client({
 });
 
 const groupSettings = {}; // Almacena el estado de "welcome" por grupo
+const prefix = '!'; // Prefijo para comandos
 
 // Función para descargar una imagen desde una URL
 const getImageBuffer = async (url) => {
@@ -19,14 +20,23 @@ client.on('ready', () => {
     console.log('¡El bot está listo y conectado!');
 });
 
-// Comando para activar o desactivar bienvenida
+// Handler de comandos
 client.on('message', async (message) => {
-    if (message.body.toLowerCase() === 'welcome on') {
+    if (!message.body.startsWith(prefix)) return; // Ignora mensajes sin prefijo
+
+    const args = message.body.slice(prefix.length).trim().split(' ');
+    const command = args.shift().toLowerCase();
+
+    // Comando welcome on
+    if (command === 'welcome' && args[0] === 'on') {
         if (message.isGroupMsg) {
             groupSettings[message.from] = true;
             message.reply('✅ Bienvenidas y despedidas activadas en este grupo.');
         }
-    } else if (message.body.toLowerCase() === 'welcome off') {
+    }
+
+    // Comando welcome off
+    if (command === 'welcome' && args[0] === 'off') {
         if (message.isGroupMsg) {
             groupSettings[message.from] = false;
             message.reply('❌ Bienvenidas y despedidas desactivadas en este grupo.');
