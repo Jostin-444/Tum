@@ -7,9 +7,8 @@ import fetch from 'node-fetch';
 import axios from 'axios';
 
 let handler = async (m, { conn, command, args, text, usedPrefix }) => {
-if (!text) return conn.reply(m.chat, `*[ ℹ️ ] Hace falta el título del audio de SoundCloud.*\n\n*[ 💡 ] Ejemplo:* _${usedPrefix + command} Floyymenor - Peligrosa_`, m, rcanal)
+if (!text) return conn.reply(m.chat, `*[ ℹ️ ] Hace falta el título del audio de SoundCloud.*\n\n*[ 💡 ] Ejemplo:* _${usedPrefix + command} Floyymenor - Peligrosa_`, m,)
 
-await m.react('🕒');
 try {
 let api = await fetch(`https://apis-starlights-team.koyeb.app/starlight/soundcloud-search?text=${encodeURIComponent(text)}`);
 let json = await api.json();
@@ -31,9 +30,7 @@ let txt = `\`DOWNLOADER - SOUNDCLOUD\`\n\n`;
 await conn.sendFile(m.chat, image, 'thumbnail.jpg', txt, m, null, rcanal);
 await conn.sendMessage(m.chat, { audio: audio, fileName: `${json[0].title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
 
-await m.react('☃️');
-} catch {
-await m.react('🥀');
+
 }}
 
 handler.help = ['soundcloud *<búsqueda>*']
