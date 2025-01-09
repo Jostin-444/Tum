@@ -27,7 +27,7 @@ let txt = `\`DOWNLOADER - SOUNDCLOUD\`\n\n`;
     txt += `▢ *Url:* ${url}\n\n`;
     txt += `> *[ ℹ️ ] Se está enviando el audio, espere...*`
 
-await conn.sendFile(m.chat, image, 'thumbnail.jpg', txt, m, null, rcanal);
+await conn.sendFile(m.chat, image, 'thumbnail.jpg', txt, m, null);
 await conn.sendMessage(m.chat, { audio: audio, fileName: `${json[0].title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
 
 
