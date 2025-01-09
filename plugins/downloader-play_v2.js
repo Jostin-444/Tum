@@ -31,12 +31,14 @@ let txt = `\`DOWNLOADER - SOUNDCLOUD\`\n\n`;
 await conn.sendFile(m.chat, image, 'thumbnail.jpg', txt, m, null, rcanal);
 await conn.sendMessage(m.chat, { audio: audio, fileName: `${json[0].title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
 
-
+await m.react('☃️');
+} catch {
+await m.react('🥀');
 }}
 
-handler.help = ['play *<búsqueda>*']
+handler.help = ['soundcloud *<búsqueda>*']
 handler.tags = ['downloader']
-handler.command = ['sound', 'play']
+handler.command = ['soundcloud', 'sound', 'play']
 
 export default handler
 
