@@ -7,6 +7,7 @@ import yts from 'yt-search';
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) return conn.reply(m.chat, '*\`Ingresa el nombre de lo que quieres buscar\`*', m);
+
   try {
     let res = await search(args.join(" "));
     let video = res[0];
@@ -40,6 +41,7 @@ let handler = async (m, { conn, args }) => {
       viewOnce: true,
       headerType: 4,
     }, { quoted: m });
+
   } catch (e) {
     console.error(e);
     conn.reply(m.chat, '*\`Error al buscar el video.\`*', m);
@@ -63,4 +65,13 @@ function secondString(seconds) {
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
   return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
+}
+
+function eYear(txt) {
+  if (txt.includes('year')) return txt.replace('year', 'año').replace('years', 'años');
+  if (txt.includes('month')) return txt.replace('month', 'mes').replace('months', 'meses');
+  if (txt.includes('day')) return txt.replace('day', 'día').replace('days', 'días');
+  if (txt.includes('hour')) return txt.replace('hour', 'hora').replace('hours', 'horas');
+  if (txt.includes('minute')) return txt.replace('minute', 'minuto').replace('minutes', 'minutos');
+  return txt;
 }
