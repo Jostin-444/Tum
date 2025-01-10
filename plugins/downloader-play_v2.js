@@ -42,7 +42,6 @@ let handler = async (m, { conn, args }) => {
     }, { quoted: m });
   } catch (e) {
     console.error(e);
-    await m.react('✖️');
     conn.reply(m.chat, '*\`Error al buscar el video.\`*', m);
   }
 };
