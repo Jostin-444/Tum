@@ -7,8 +7,6 @@ import yts from 'yt-search';
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) return conn.reply(m.chat, '*\`Ingresa el nombre de lo que quieres buscar\`*', m);
-
-  await m.react('🕓');
   try {
     let res = await search(args.join(" "));
     let video = res[0];
@@ -42,8 +40,6 @@ let handler = async (m, { conn, args }) => {
       viewOnce: true,
       headerType: 4,
     }, { quoted: m });
-
-    await m.react('✅');
   } catch (e) {
     console.error(e);
     await m.react('✖️');
