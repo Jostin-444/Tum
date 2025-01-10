@@ -1,77 +1,61 @@
-/* 
-- Play Botones By Angel-OFC 
-- https://whatsapp.com/channel/0029VaJxgcB0bIdvuOwKTM2Y
+*/ 
+
+Adapted By Crxstian Escobar ✧
 */
+
 import fetch from 'node-fetch';
-import yts from 'yt-search';
+import axios from 'axios';
 
-let handler = async (m, { conn, args }) => {
-  if (!args[0]) return conn.reply(m.chat, '*\`Ingresa el nombre de lo que quieres buscar\`*', m);
+let handler = async (m, { conn, command, args, text, usedPrefix }) => {
+if (!text) return conn.reply(m.chat, `*[ ℹ️ ] Hace falta el título del audio de SoundCloud.*\n\n*[ 💡 ] Ejemplo:* _${usedPrefix + command} Floyymenor - Peligrosa_`, m)
 
-  try {
-    let res = await search(args.join(" "));
-    let video = res[0];
-    let img = await (await fetch(video.image)).buffer();
 
-    let txt = `*\`【Y O U T U B E - P L A Y】\`*\n\n`;
-    txt += `• *\`Título:\`* ${video.title}\n`;
-    txt += `• *\`Duración:\`* ${secondString(video.duration.seconds)}\n`;
-    txt += `• *\`Publicado:\`* ${eYear(video.ago)}\n`;
-    txt += `• *\`Canal:\`* ${video.author.name || 'Desconocido'}\n`;
-    txt += `• *\`Url:\`* _https://youtu.be/${video.videoId}_\n\n`;
+try {
+let api = await fetch(`https://apis-starlights-team.koyeb.app/starlight/soundcloud-search?text=${encodeURIComponent(text)}`);
+let json = await api.json();
+let { url } = json[0];
 
-    await conn.sendMessage(m.chat, {
-      image: img,
-      caption: txt,
-      footer: 'Selecciona una opción',
-      buttons: [
-        {
-          buttonId: `.ytmp3 https://youtu.be/${video.videoId}`,
-          buttonText: {
-            displayText: '🎵 Audio',
-          },
-        },
-        {
-          buttonId: `.ytmp4 https://youtu.be/${video.videoId}`,
-          buttonText: {
-            displayText: '🎥 Video',
-          },
-        },
-      ],
-      viewOnce: true,
-      headerType: 4,
-    }, { quoted: m });
+let api2 = await fetch(`https://apis-starlights-team.koyeb.app/starlight/soundcloud?url=${url}`);
+let json2 = await api2.json();
 
-  } catch (e) {
-    console.error(e);
-    conn.reply(m.chat, '*\`Error al buscar el video.\`*', m);
-  }
+let { link: dl_url, quality, image } = json2;
+
+let audio = await getBuffer(dl_url);
+
+let txt = `\`DOWNLOADER - SOUNDCLOUD\`\n\n`;
+    txt += `▢ *Título:* ${json[0].title}\n`;
+    txt += `▢ *Calidad:* ${quality}\n`;
+    txt += `▢ *Url:* ${url}\n\n`;
+    txt += `> *[ ℹ️ ] Se está enviando el audio, espere...*`
+
+await conn.sendFile(m.chat, image, 'thumbnail.jpg', txt, m, null, rcanal);
+await conn.sendMessage(m.chat, { audio: audio, fileName: `${json[0].title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m })
+
+
+} catch {
+
+}}
+
+handler.help = ['soundcloud *<búsqueda>*']
+handler.tags = ['downloader']
+handler.command = ['soundcloud', 'sound', 'play']
+
+export default handler
+
+const getBuffer = async (url, options) => {
+try {
+const res = await axios({
+method: 'get',
+url,
+headers: {
+'DNT': 1,
+'Upgrade-Insecure-Request': 1,
+},
+...options,
+responseType: 'arraybuffer',
+});
+return res.data;
+} catch (e) {
+console.log(`Error : ${e}`);
+}
 };
-
-handler.help = ['play *<texto>*'];
-handler.tags = ['dl'];
-handler.command = ['play'];
-
-export default handler;
-
-async function search(query, options = {}) {
-  let search = await yts.search({ query, hl: "es", gl: "ES", ...options });
-  return search.videos;
-}
-
-function secondString(seconds) {
-  seconds = Number(seconds);
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
-}
-
-function eYear(txt) {
-  if (txt.includes('year')) return txt.replace('year', 'año').replace('years', 'años');
-  if (txt.includes('month')) return txt.replace('month', 'mes').replace('months', 'meses');
-  if (txt.includes('day')) return txt.replace('day', 'día').replace('days', 'días');
-  if (txt.includes('hour')) return txt.replace('hour', 'hora').replace('hours', 'horas');
-  if (txt.includes('minute')) return txt.replace('minute', 'minuto').replace('minutes', 'minutos');
-  return txt;
-}
